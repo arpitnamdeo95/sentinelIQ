@@ -53,50 +53,50 @@ const AddUserModal = ({ userType, setShowModal }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 text-white rounded-lg p-8 w-96 shadow-lg">
-        <h3 className="text-2xl font-semibold mb-6 text-center">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-[#18181b] border border-white/10 text-white rounded-2xl p-8 w-[400px] shadow-xl">
+        <h3 className="text-xl font-bold mb-6 text-center text-white">
           Add {userType === "resident" ? "Resident" : "Authority"} User
         </h3>
         <div className="mb-4">
-          <label className="block mb-2 text-lg">Name</label>
+          <label className="block mb-2 text-sm font-medium text-zinc-400">Name</label>
           <input
             type="text"
-            className="w-full p-3 border border-gray-600 rounded bg-gray-800 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-zinc-800 rounded-lg bg-zinc-900 text-white focus:outline-none focus:border-indigo-500 transition-colors"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </div>
         <div className="mb-4">
-          <label className="block mb-2 text-lg">Email</label>
+          <label className="block mb-2 text-sm font-medium text-zinc-400">Email</label>
           <input
             type="email"
-            className="w-full p-3 border border-gray-600 rounded bg-gray-800 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-zinc-800 rounded-lg bg-zinc-900 text-white focus:outline-none focus:border-indigo-500 transition-colors"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className="mb-4">
-          <label className="block mb-2 text-lg">Locality</label>
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium text-zinc-400">Locality</label>
           <input
             type="text"
-            className="w-full p-3 border border-gray-600 rounded bg-gray-800 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-zinc-800 rounded-lg bg-zinc-900 text-white focus:outline-none focus:border-indigo-500 transition-colors"
             value={locality}
             onChange={(e) => setLocality(e.target.value)}
           />
         </div>
-        <div className="flex justify-end gap-6">
+        <div className="flex justify-end gap-4">
           <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-transform transform hover:scale-105"
-            onClick={handleSubmit}
-          >
-            Add
-          </button>
-          <button
-            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg shadow-md transition-transform transform hover:scale-105"
+            className="bg-zinc-800 hover:bg-zinc-700 text-white px-5 py-2.5 rounded-lg border border-white/5 transition-all w-full text-sm font-medium"
             onClick={() => setShowModal(false)}
           >
             Cancel
+          </button>
+          <button
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg shadow-sm transition-all w-full text-sm font-medium"
+            onClick={handleSubmit}
+          >
+            Add
           </button>
         </div>
       </div>
@@ -104,41 +104,67 @@ const AddUserModal = ({ userType, setShowModal }) => {
   );
 };
 
-const UserTable = ({ users, userType }) => (
-  <div className="space-y-6">
-    <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-white">
-      {userType === "resident" ? <IoPeople className="w-6 h-6 text-blue-500" /> : <IoShieldCheckmark className="w-6 h-6 text-green-500" />}
-      {userType === "resident" ? "Resident Users" : "Authority Users"}
-    </h3>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {users.map((user) => (
-        <div key={user.email} className="bg-gray-800 p-6 rounded-lg shadow-lg hover:bg-gray-700 transition-all">
-          <h4 className="text-xl font-bold text-white">{user.name}</h4>
-          <p className="text-gray-300">{user.email}</p>
-          <p className="text-gray-500">{user.locality}</p>
+const UserTable = ({ users, userType }) => {
+  const isResident = userType === "resident";
+  return (
+    <div className="space-y-6 w-full">
+      <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+        <div className={`p-2 rounded-lg ${isResident ? 'bg-indigo-500/10' : 'bg-emerald-500/10'}`}>
+          {isResident ? <IoPeople className="w-5 h-5 text-indigo-400" /> : <IoShieldCheckmark className="w-5 h-5 text-emerald-400" />}
         </div>
-      ))}
+        <h3 className="text-xl font-semibold text-white tracking-tight">
+          {isResident ? "Resident Directory" : "Authority Directory"}
+        </h3>
+        <span className="ml-auto bg-zinc-800 text-zinc-300 text-xs font-bold px-2.5 py-1 rounded-full">{users.length}</span>
+      </div>
+      
+      {users.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center border border-dashed border-white/5 rounded-xl bg-zinc-900/30">
+          <p className="text-zinc-500 text-sm">No {isResident ? "residents" : "authorities"} registered yet.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {users.map((user, idx) => (
+            <div key={idx} className="bg-[#18181b] p-5 rounded-xl border border-white/5 shadow-sm hover:border-zinc-700 transition-colors group">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${isResident ? 'bg-indigo-900/50 text-indigo-300' : 'bg-emerald-900/50 text-emerald-300'}`}>
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h4 className="text-base font-medium text-zinc-100 group-hover:text-white transition-colors">{user.name}</h4>
+                  <p className="text-zinc-500 text-xs truncate max-w-[150px]">{user.email}</p>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-600">Location</span>
+                <span className="text-xs font-medium text-zinc-400">{user.locality}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 const NotifyPage = () => {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [userType, setUserType] = useState("");
   const [residentUsers, setResidentUsers] = useState([]);
   const [authorityUsers, setAuthorityUsers] = useState([]);
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/residents/get-residents")
+      .get(`${BACKEND_URL}/api/residents/get-residents`)
       .then((response) => setResidentUsers(response.data))
       .catch((error) => console.error(error));
 
     axios
-      .get("http://localhost:5000/api/authorities/get-authorities")
+      .get(`${BACKEND_URL}/api/authorities/get-authorities`)
       .then((response) => setAuthorityUsers(response.data))
       .catch((error) => console.error(error));
-  }, []);
+  }, [BACKEND_URL]);
 
   const handleAddUserClick = (type) => {
     setUserType(type);
@@ -150,53 +176,89 @@ const NotifyPage = () => {
       type === "resident" ? "/api/mail/send-resident-alert" : "/api/mail/send-authority-alert";
 
     axios
-      .post(`http://localhost:5000${endpoint}`)
+      .post(`${BACKEND_URL}${endpoint}`)
       .then((response) => alert(response.data.message))
       .catch(() => alert(`Failed to send email to ${type}s.`));
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-900 via-indigo-800 to-gray-900">
-      <div className="w-64 bg-gray-800 text-white p-6 space-y-6 shadow-lg">
-        <h2 className="text-2xl font-bold ">ZEN SAFE</h2>
-        <button
-          className="w-full p-4 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-3 transition-all hover:scale-105"
-          onClick={() => handleAddUserClick("resident")}
-        >
-          <FaUserPlus className="w-6 h-6" /> Add Resident User
-        </button>
-        <button
-          className="w-full p-4 bg-green-600 hover:bg-green-700 rounded-lg flex items-center gap-3 transition-all hover:scale-105"
-          onClick={() => handleAddUserClick("authority")}
-        >
-          <FaUserShield className="w-6 h-6" /> Add Authority User
-        </button>
-      </div>
-      <div className="flex-1 bg-gray-900 p-5 space-y-5 overflow-auto">
-        <Header title="Notify Service" />
-        <ContentWithLottie/>
-        <div>
-          <UserTable users={residentUsers} userType="resident" />
-          <div className="flex justify-center mt-6">
-            <button
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all hover:scale-105 flex items-center gap-3"
-              onClick={() => handleSendEmail("resident")}
-            >
-              <FaEnvelope className="w-6 h-6" /> Notify Residents
-            </button>
+    <div className="flex-1 overflow-auto bg-[#0a0a0a] text-zinc-100 min-h-screen relative">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+
+      <div className="relative z-10">
+        <Header title="Notification Hub" />
+        <main className="max-w-7xl mx-auto py-8 px-4 lg:px-8 space-y-8">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Lottie & Info Box */}
+            <div className="lg:col-span-1 flex flex-col items-center justify-center p-8 bg-[#18181b] border border-white/5 rounded-2xl shadow-sm text-center">
+              <Player
+                autoplay
+                loop
+                src="CustomerSupport.json"
+                className="w-48 h-48 mb-6"
+              />
+              <h2 className="text-xl font-bold text-white mb-3">Broadcast Center</h2>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                The Notify module interfaces with the NodeMailer API to dispatch instantaneous digital alerts to the concerned Authorities and aligned Residents within the affected zoning grids.
+              </p>
+            </div>
+
+            {/* Actions Grid */}
+            <div className="lg:col-span-2 flex flex-col justify-center gap-6">
+              <div className="flex flex-col sm:flex-row gap-6">
+                <button
+                  className="flex-1 group relative p-6 bg-[#18181b] hover:bg-zinc-900 border border-white/5 hover:border-indigo-500/30 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all overflow-hidden"
+                  onClick={() => handleAddUserClick("resident")}
+                >
+                  <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="p-4 bg-indigo-500/10 rounded-full text-indigo-400 relative z-10">
+                    <FaUserPlus className="w-6 h-6" />
+                  </div>
+                  <span className="font-semibold text-white tracking-wide relative z-10">Onboard Resident</span>
+                </button>
+                <button
+                  className="flex-1 group relative p-6 bg-[#18181b] hover:bg-zinc-900 border border-white/5 hover:border-emerald-500/30 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all overflow-hidden"
+                  onClick={() => handleAddUserClick("authority")}
+                >
+                  <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="p-4 bg-emerald-500/10 rounded-full text-emerald-400 relative z-10">
+                    <FaUserShield className="w-6 h-6" />
+                  </div>
+                  <span className="font-semibold text-white tracking-wide relative z-10">Register Authority</span>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-        <div>
-          <UserTable users={authorityUsers} userType="authority" />
-          <div className="flex justify-center mt-6">
-            <button
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-md transition-all hover:scale-105 flex items-center gap-3"
-              onClick={() => handleSendEmail("authority")}
-            >
-              <FaEnvelope className="w-6 h-6" /> Notify Authorities
-            </button>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+            {/* Resident Table Panel */}
+            <div className="flex flex-col bg-[#18181b] p-6 rounded-2xl border border-white/5 shadow-sm h-full">
+              <UserTable users={residentUsers} userType="resident" />
+              <div className="mt-8 pt-6 border-t border-white/5 mt-auto">
+                <button
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3.5 rounded-xl shadow-sm transition-all flex justify-center items-center gap-3 font-semibold text-sm"
+                  onClick={() => handleSendEmail("resident")}
+                >
+                  <FaEnvelope className="w-4 h-4" /> Dispatch Resident Broadcast
+                </button>
+              </div>
+            </div>
+
+            {/* Authority Table Panel */}
+            <div className="flex flex-col bg-[#18181b] p-6 rounded-2xl border border-white/5 shadow-sm h-full">
+              <UserTable users={authorityUsers} userType="authority" />
+              <div className="mt-8 pt-6 border-t border-white/5 mt-auto">
+                <button
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3.5 rounded-xl shadow-sm transition-all flex justify-center items-center gap-3 font-semibold text-sm"
+                  onClick={() => handleSendEmail("authority")}
+                >
+                  <FaEnvelope className="w-4 h-4" /> Issue Authority Dispatch
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
       {showAddUserModal && <AddUserModal userType={userType} setShowModal={setShowAddUserModal} />}
     </div>

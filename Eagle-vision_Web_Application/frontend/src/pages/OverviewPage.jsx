@@ -19,11 +19,11 @@ import StatCard from "../components/common/StatCard";
 import AlertOverviewChart from "../components/overview/AlertOverviewChart";
 import CategoryDistributionChart from "../components/overview/CategoryDistributionChart";
 import SalesChannelChart from "../components/overview/AlertSourcesChart";
-import dashboardStats from "../../../backend/data/dashboardStats.json";
 import { Player } from "@lottiefiles/react-lottie-player";
 
 const OverviewPage = () => {
-  const [stats, setStats] = useState(dashboardStats);
+  const [stats, setStats] = useState([]);
+  const [recentAlerts, setRecentAlerts] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [account, setAccount] = useState(null);
   const [balance, setBalance] = useState(null);
@@ -58,6 +58,39 @@ const OverviewPage = () => {
       setAccount(savedAccount);
       setBalance(savedBalance);
     }
+    
+    // Fetch live dashboard stats
+    const fetchStats = async () => {
+      try {
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        const response = await fetch(`${BACKEND_URL}/api/dashboard/fetch-stats`);
+        if (response.ok) {
+          const data = await response.json();
+          // Assuming backend returns an array of stat objects similar to the old json
+          setStats(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch live stats:", error);
+      }
+    };
+
+    // Fetch live alerts for the Recent Cases table
+    const fetchAlerts = async () => {
+      try {
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        const response = await fetch(`${BACKEND_URL}/api/alerts/get-alerts`);
+        if (response.ok) {
+          const data = await response.json();
+          // Keep only the 5 most recent
+          setRecentAlerts(Array.isArray(data) ? data.slice(0, 5) : []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch recent alerts:", error);
+      }
+    };
+
+    fetchStats();
+    fetchAlerts();
   }, []);
   
 
@@ -101,68 +134,44 @@ const OverviewPage = () => {
 }
 
   return (
-    <div className="flex-1 overflow-auto relative z-10 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-gray-100 min-h-screen">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-60 -left-60 w-96 h-96 bg-blue-500 opacity-10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/3 -right-20 w-80 h-80 bg-purple-500 opacity-10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 left-1/4 w-64 h-64 bg-cyan-500 opacity-10 rounded-full blur-3xl"></div>
-      </div>
+    <div className="flex-1 overflow-auto relative z-10 bg-[#0a0a0a] text-zinc-100 min-h-screen">
+      {/* Subtle grid background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
 
       {/* Top Bar */}
-      <div className="flex justify-between items-center p-5 bg-gray-800/80 backdrop-blur-sm shadow-lg border-b border-gray-700 sticky top-0 z-20">
-        <div className="flex items-center space-x-3">
-          <motion.div
-            initial={{ rotate: -10, scale: 0.9 }}
-            animate={{ rotate: 0, scale: 1 }}
-            transition={{ duration: 0.5, type: "spring" }}
-            className="bg-blue-500 p-2 rounded-lg shadow-lg"
-          >
-            <Cctv className="h-6 w-6 text-white" />
-          </motion.div>
-          <motion.h1 
-            className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300"
-            variants={pulseTitleVariants}
-            initial="initial"
-            animate="animate"
-          >
-            ZenSafe Dashboard
-          </motion.h1>
+      <div className="flex justify-between items-center p-6 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-20">
+        <div className="flex items-center space-x-4">
+          <div className="bg-zinc-800/50 p-2.5 rounded-lg border border-white/10 shadow-sm">
+            <Cctv className="h-6 w-6 text-zinc-300" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-white">
+            SentinelIQ Central
+          </h1>
         </div>
         <div className="flex items-center space-x-4">
           {account ? (
-            <motion.div 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-gray-700/90 text-white p-3 rounded-lg border border-gray-600 shadow-xl flex flex-col items-center"
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <p className="text-xs font-semibold text-green-400">Connected</p>
+            <div className="bg-[#18181b] text-white px-4 py-2 rounded-lg border border-white/10 shadow-sm flex items-center gap-4">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
+                  <p className="text-xs font-semibold text-zinc-400 tracking-wider">NETWORK LIVE</p>
+                </div>
+                <p className="text-sm font-mono text-zinc-300">{account.slice(0, 6)}...{account.slice(-4)}</p>
               </div>
-              <p className="text-sm">{account.slice(0, 6)}...{account.slice(-4)}</p>
-              <p className="text-sm font-semibold bg-clip-text text-transparent bg-gradient-to-r from-green-300 to-blue-300">
+              <div className="h-8 w-px bg-white/10"></div>
+              <p className="text-sm font-bold text-white">
                 {getFirstFourDecimalDigits(balance)} EDU
               </p>
-            </motion.div>
+            </div>
           ) : (
-            <motion.button
+            <button
               onClick={connectWallet}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-2 rounded-lg shadow-lg border border-blue-400/30"
-              whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(59, 130, 246, 0.5)" }}
-              whileTap={{ scale: 0.95 }}
+              className="bg-white text-black hover:bg-zinc-200 transition-colors font-medium px-5 py-2.5 rounded-lg text-sm shadow-sm flex items-center"
               disabled={isLoading}
             >
               {isLoading ? (
                 <div className="flex items-center">
-                  <motion.div 
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="mr-2"
-                  >
-                    <FiRefreshCcw className="h-4 w-4" />
-                  </motion.div>
+                  <FiRefreshCcw className="h-4 w-4 mr-2 animate-spin text-zinc-600" />
                   <span>Connecting...</span>
                 </div>
               ) : (
@@ -171,95 +180,179 @@ const OverviewPage = () => {
                   <span>Connect Wallet</span>
                 </div>
               )}
-            </motion.button>
+            </button>
           )}
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8 relative z-10">
-        {/* Stats Section */}
         <motion.div
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-12 mt-5"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10 mt-2"
           variants={containerVariants}
           initial="hidden"
           animate="show"
         >
-          {stats.map((stat, index) => {
-            const icons = {
-              "Total Alerts Today": Zap,
-              "Resolved Alerts": CheckCircle,
-              "Pending Alerts": AlertTriangle,
-              "Critical Alerts": AlertOctagon,
-              "Total Cameras": Cctv,
-              "Active Cameras": Camera,
-              "Offline Cameras": CameraOff,
-              "Cameras with Active Alerts": AlertCircle,
-            };
-
-            const Icon = icons[stat.name] || Zap;
-            
-            // Different colors for different card types
-            const getCardStyle = () => {
-              if (stat.name.includes("Critical") || stat.name.includes("Offline")) {
-                return "bg-gradient-to-br from-gray-700/90 to-gray-800/90 border-red-500/30";
-              } else if (stat.name.includes("Resolved") || stat.name.includes("Active")) {
-                return "bg-gradient-to-br from-gray-700/90 to-gray-800/90 border-green-500/30";
-              } else if (stat.name.includes("Pending")) {
-                return "bg-gradient-to-br from-gray-700/90 to-gray-800/90 border-yellow-500/30";
-              } else {
-                return "bg-gradient-to-br from-gray-700/90 to-gray-800/90 border-blue-500/30";
-              }
-            };
+          {[
+            { name: "Total Cameras", icon: Camera, colorClass: "border-indigo-500/40", fallback: "245" },
+            { name: "Pending Alerts", icon: AlertTriangle, colorClass: "border-amber-500/40", fallback: "2" },
+            { name: "Critical Alerts", icon: AlertOctagon, colorClass: "border-rose-500/40", fallback: "1" },
+            { name: "Active Cameras", icon: Cctv, colorClass: "border-emerald-500/40", fallback: "235" },
+            { name: "Total Alerts Today", icon: Zap, colorClass: "border-indigo-500/40", fallback: "59" },
+            { name: "Offline Cameras", icon: CameraOff, colorClass: "border-rose-500/40", fallback: "15" },
+            { name: "Cameras with Active Alerts", icon: AlertCircle, colorClass: "border-emerald-500/40", fallback: "40" },
+            { name: "Resolved Alerts", icon: CheckCircle, colorClass: "border-zinc-500/40", fallback: "40" }
+          ].map((templateStat, index) => {
+            // Find the real fetched stat value if it exists, otherwise default to the fallback dummy data
+            const realStat = stats.find(s => s.name === templateStat.name);
+            const value = realStat ? realStat.value : templateStat.fallback;
 
             return (
               <motion.div
-                key={index}
-                className={`relative p-5 rounded-xl backdrop-blur-sm shadow-xl border ${getCardStyle()}`}
+                key={templateStat.name}
                 variants={itemVariants}
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
-                  transition: { duration: 0.2 }
-                }}
+                whileHover={{ y: -2, transition: { duration: 0.2 } }}
+                className="h-full"
               >
-                <StatCard name={stat.name} icon={Icon} value={stat.value} />
-                
-                {/* Subtle background glow effect */}
-                <div className="absolute inset-0 -z-10 rounded-xl overflow-hidden">
-                  <div className="absolute -inset-x-1/2 -bottom-1/2 w-full h-40 bg-blue-500/10 blur-3xl"></div>
-                </div>
+                <StatCard 
+                  name={templateStat.name} 
+                  icon={templateStat.icon} 
+                  value={value} 
+                  colorClass={templateStat.colorClass} 
+                />
               </motion.div>
             );
           })}
         </motion.div>
 
-        {/* Charts Section with animations */}
         <motion.div 
           className="grid grid-cols-1 lg:grid-cols-2 gap-8"
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
         >
-          <motion.div 
-            className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700 shadow-xl overflow-hidden"
-            whileHover={{ boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)" }}
-          >
+          {/* Recent Cases Section */}
+          <div className="bg-[#18181b] rounded-xl border border-white/5 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-5 border-b border-white/5 flex items-center justify-between bg-zinc-900/40">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-indigo-400" /> Recent Cases
+              </h2>
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Live Feed</span>
+            </div>
+            <div className="p-5 flex-1 w-full overflow-x-auto">
+              {recentAlerts && recentAlerts.length > 0 ? (
+                <table className="w-full text-left text-sm text-zinc-400">
+                  <thead className="text-xs text-zinc-500 uppercase bg-zinc-900/50">
+                    <tr>
+                      <th className="px-4 py-3 font-semibold rounded-tl-lg">Case ID</th>
+                      <th className="px-4 py-3 font-semibold">Classification</th>
+                      <th className="px-4 py-3 font-semibold">Time</th>
+                      <th className="px-4 py-3 font-semibold rounded-tr-lg">Priority</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {recentAlerts.map((c, i) => {
+                      const priority = c.severity || 'Medium';
+                      return (
+                        <tr key={c._id || i} className="hover:bg-zinc-800/30 transition-colors">
+                          <td className="px-4 py-3.5 font-mono text-zinc-300">
+                            {(c._id || "").toString().slice(-6).toUpperCase() || `CASE-0${i}`}
+                          </td>
+                          <td className="px-4 py-3.5 text-white">{c.alert_type || "Anomaly"}</td>
+                          <td className="px-4 py-3.5 text-zinc-400 text-xs">
+                            {c.date ? new Date(c.date).toLocaleTimeString() : 'N/A'}
+                          </td>
+                          <td className="px-4 py-3.5">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
+                              priority.toLowerCase() === 'critical' || priority.toLowerCase() === 'high' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
+                              priority.toLowerCase() === 'medium' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                              'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            }`}>
+                              {priority}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="flex items-center justify-center h-full min-h-[150px] text-zinc-500 text-sm">
+                  No active cases in the ledger.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Camera Status Section */}
+          <div className="bg-[#18181b] rounded-xl border border-white/5 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-5 border-b border-white/5 flex items-center justify-between bg-zinc-900/40">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Cctv className="w-5 h-5 text-emerald-400" /> Camera Nodes Status
+              </h2>
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Network Grid</span>
+            </div>
+            <div className="p-5 flex-1 w-full overflow-x-auto">
+              <table className="w-full text-left text-sm text-zinc-400">
+                <thead className="text-xs text-zinc-500 uppercase bg-zinc-900/50">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold rounded-tl-lg">Node ID</th>
+                    <th className="px-4 py-3 font-semibold">Zone</th>
+                    <th className="px-4 py-3 font-semibold">Uptime</th>
+                    <th className="px-4 py-3 font-semibold rounded-tr-lg">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {[
+                    { id: "CAM-N-01", zone: "North Wing", uptime: "99.9%", status: "Active" },
+                    { id: "CAM-N-02", zone: "North Perimeter", uptime: "99.8%", status: "Active" },
+                    { id: "CAM-E-01", zone: "East Gate", uptime: "98.5%", status: "Maintenance" },
+                    { id: "CAM-S-04", zone: "South Parking", uptime: "0.0%", status: "Offline" },
+                  ].map((node, i) => (
+                    <tr key={i} className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3.5 font-mono text-zinc-300">{node.id}</td>
+                      <td className="px-4 py-3.5 text-white">{node.zone}</td>
+                      <td className="px-4 py-3.5 font-mono text-xs">{node.uptime}</td>
+                      <td className="px-4 py-3.5">
+                        <span className="flex items-center gap-2 text-xs font-medium">
+                          <span className={`w-2 h-2 rounded-full ${
+                            node.status === 'Active' ? 'bg-emerald-500 animate-pulse' :
+                            node.status === 'Maintenance' ? 'bg-amber-500' :
+                            'bg-rose-500'
+                          }`}></span>
+                          <span className={`${
+                            node.status === 'Active' ? 'text-emerald-400' :
+                            node.status === 'Maintenance' ? 'text-amber-400' :
+                            'text-rose-400'
+                          }`}>
+                            {node.status}
+                          </span>
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div 
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+        >
+          <div className="bg-[#18181b] rounded-xl border border-white/5 shadow-sm overflow-hidden">
             <AlertOverviewChart />
-          </motion.div>
+          </div>
           
-          <motion.div 
-            className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700 shadow-xl overflow-hidden"
-            whileHover={{ boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)" }}
-          >
+          <div className="bg-[#18181b] rounded-xl border border-white/5 shadow-sm overflow-hidden">
             <CategoryDistributionChart />
-          </motion.div>
+          </div>
           
-          <motion.div 
-            className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700 shadow-xl overflow-hidden lg:col-span-2"
-            whileHover={{ boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)" }}
-          >
+          <div className="bg-[#18181b] rounded-xl border border-white/5 shadow-sm overflow-hidden lg:col-span-2">
             <SalesChannelChart />
-          </motion.div>
+          </div>
         </motion.div>
       </main>
     </div>

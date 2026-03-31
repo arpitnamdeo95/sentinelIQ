@@ -16,9 +16,12 @@ const AlertsPage = () => {
 
   const navigate = useNavigate();
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const ADMIN_KEY = import.meta.env.VITE_ADMIN_API_KEY || "SuperSecretAdminKey123";
+
   const fetchAlerts = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/alerts/fetch-alerts");
+      const response = await fetch(`${BACKEND_URL}/api/alerts/fetch-alerts`);
       const data = await response.json();
       setAlerts(data);
     } catch (error) {
@@ -56,9 +59,13 @@ const AlertsPage = () => {
   };
 
   const handleDeleteAlert = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this alert? This action requires Admin credentials.")) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/alerts/delete-alerts/${id}`, {
+      const response = await fetch(`${BACKEND_URL}/api/alerts/delete-alerts/${id}`, {
         method: "DELETE",
+        headers: {
+          "x-api-key": ADMIN_KEY
+        }
       });
       if (response.ok) {
         setAlerts((prevAlerts) => prevAlerts.filter((alert) => alert._id !== id));
@@ -114,16 +121,20 @@ const AlertsPage = () => {
   
 
   return (
-    <div className="flex-1 overflow-auto relative bg-gradient-to-br from-gray-800 via-gray-900 to-black text-gray-100 min-h-screen">
-      <Header title="Alerts" />
-      <div className="flex flex-col items-center justify-center py-10">
-        <Player autoplay loop src="Emergency.json" className="w-48 h-48" />
-        <p className="text-center text-gray-300 text-lg max-w-xl mt-4">
-          The vulnerability detected through our S3R Deep Learning Model is displayed here. The Alerts are encrypted through Blockchain and decrypted to showcast here.  Click on an alert to view details.
-        </p>
-      </div>
+    <div className="flex-1 overflow-auto relative bg-[#0a0a0a] text-zinc-100 min-h-screen">
+      {/* Subtle grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
+      <div className="relative z-10">
+        <Header title="Alerts" />
+        <div className="flex flex-col items-center justify-center py-10 relative">
+          <Player autoplay loop src="Emergency.json" className="w-48 h-48" />
+          <p className="text-center text-zinc-300 text-lg max-w-2xl mt-4 bg-zinc-900/80 p-6 rounded-xl border border-white/5 shadow-sm">
+            The vulnerability detected through our API is displayed here. The Alerts are securely fetched to showcase here. Click on an alert to view footage and details.
+          </p>
+        </div>
+
+        <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
         {alerts.length === 0 ? (
           <p className="text-center text-gray-300">No alerts available.</p>
         ) : (
@@ -131,13 +142,21 @@ const AlertsPage = () => {
             {alerts.map((alert) => (
               <div
                 key={alert._id}
-                className="relative bg-red-600 p-5 rounded-lg shadow-lg hover:shadow-2xl hover:bg-red-500 transition-all transform hover:scale-105 cursor-pointer"
+                className="relative bg-zinc-900 border border-white/5 p-6 rounded-xl shadow-sm hover:border-rose-500/50 transition-all cursor-pointer overflow-hidden group"
                 onClick={() => handlePopupOpen(alert)}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-transparent opacity-40 rounded-lg blur-md"></div>
-                <div className="relative z-10 flex items-center">
-                  <FiAlertCircle size={28} className="text-white mr-4" />
-                  <h3 className="text-white font-bold">Alert Received at {alert.anomalyTime}</h3>
+                
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="bg-rose-500/10 p-3 rounded-md mr-4 border border-rose-500/20">
+                      <FiAlertCircle size={22} className="text-rose-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-white font-semibold">Critical Anomaly</h3>
+                      <p className="text-zinc-400 text-sm mt-0.5">{alert.anomalyTime}</p>
+                    </div>
+                  </div>
+                  <div className="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse"></div>
                 </div>
               </div>
             ))}
@@ -145,17 +164,21 @@ const AlertsPage = () => {
         )}
 
         {showPopup && selectedAlert && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <motion.div
-              className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-5xl"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
+              className="relative bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-xl p-8 w-full max-w-5xl overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
             >
-              <button className="absolute top-3 right-3 text-gray-600 hover:text-gray-900" onClick={handlePopupClose}>
-                <FiX size={24} />
+
+              <button 
+                className="absolute top-4 right-4 text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 p-2 text-sm rounded-lg transition-colors z-20" 
+                onClick={handlePopupClose}
+              >
+                <FiX size={20} />
               </button>
-              <h2 className="text-2xl font-bold text-white text-center mb-4">Alert Details</h2>
+              <h2 className="text-2xl font-bold text-white text-center mb-6 relative z-10">Incident Report</h2>
 
               {showMap ? (
                 <div className="relative w-full mb-6" style={{ paddingBottom: "56.25%" }}>
@@ -180,48 +203,57 @@ const AlertsPage = () => {
                 <div className="mt-6 w-full h-[400px]"></div>
               )}
 
-              <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="grid grid-cols-2 gap-4 mt-6 relative z-10">
                 <button
-                  className="flex items-center justify-center bg-gray-600 hover:bg-gray-600 text-white py-3 px-6 rounded-md shadow-lg transition"
+                  className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-3 px-6 rounded-lg border border-white/5 shadow-sm transition-all"
                   onClick={() => handleLocateAnomaly(selectedAlert)}
                 >
-                  <FiMapPin className="w-6 h-6 mr-2" /> Locate Anomaly
+                  <FiMapPin className="w-5 h-5 mr-3 text-indigo-400" /> Locate Anomaly
                 </button>
 
                 <button
-                  className="flex items-center justify-center bg-gray-600 hover:bg-grey-600 text-white py-3 px-6 rounded-md shadow-lg transition"
+                  className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-3 px-6 rounded-lg border border-white/5 shadow-sm transition-all"
                   onClick={() => handleViewNearestCCTV(selectedAlert.coordinates, selectedAlert.location)}
                 >
-                  <FiCamera className="w-6 h-6 mr-2" /> View Nearest CCTV
+                  <FiCamera className="w-5 h-5 mr-3 text-indigo-400" /> View Nearest CCTV
                 </button>
 
                 <button
-                  className="flex items-center justify-center bg-gray-600 hover:bg-grey-600 text-white py-3 px-6 rounded-md shadow-lg transition"
+                  className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-3 px-6 rounded-lg border border-white/5 shadow-sm transition-all"
                   onClick={handleNotify}
                 >
-                  <FiBell className="w-6 h-6 mr-2" /> Notify
+                  <FiBell className="w-5 h-5 mr-3 text-indigo-400" /> Notify Authorities
                 </button>
 
                 <button
-                  className="flex items-center justify-center bg-gray-600 hover:bg-grey-600 text-white py-3 px-6 rounded-md shadow-lg transition"
+                  className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-3 px-6 rounded-lg border border-white/5 shadow-sm transition-all"
                   onClick={() => navigate("/casemap")}
                 >
-                  <ChartNetworkIcon className="w-6 h-6 mr-2" /> Case Map
+                  <ChartNetworkIcon className="w-5 h-5 mr-3 text-indigo-400" /> Generate Case Map
+                </button>
+
+                <button
+                  className="flex items-center justify-center bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-medium py-3 px-6 rounded-lg border border-rose-500/20 shadow-sm transition-all"
+                  onClick={() => handleDeleteAlert(selectedAlert._id)}
+                >
+                  <FiTrash2 className="w-5 h-5 mr-3" /> Dismiss Alert
                 </button>
               </div>
 
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-center mt-6 relative z-10 p-4 bg-zinc-900 rounded-xl border border-white/5">
                 <button
-                  className="bg-gray-500  hover:bg-gray-800 text-gray-300 py-2 px-4 rounded-md shadow-lg transition"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-8 rounded-lg shadow-sm transition-all flex items-center"
                   onClick={() => handleFootageView(selectedAlert.footageUrl)}
                 >
-                  View Footage
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse mr-3"></span>
+                  View Live Footage
                 </button>
               </div>
             </motion.div>
           </div>
         )}
       </main>
+      </div>
     </div>
   );
 };

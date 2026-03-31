@@ -13,13 +13,13 @@ export default {
 			"100%": { transform: "translateY(0)", opacity: 1 },
 		  },
 		  glow: {
-			"0%, 100%": {
+			"0%, 100%": { 
 			  boxShadow: "0 0 10px rgba(0, 255, 0, 0.8), 0 0 20px rgba(0, 255, 0, 0.6)",
-			},
+			}, 
 			"50%": {
 			  boxShadow: "0 0 20px rgba(0, 255, 0, 1), 0 0 40px rgba(0, 255, 0, 1)",
 			},
-		  },
+		  }, 
 		  'float-smooth': {
 			'0%, 100%': { transform: 'translateY(0px)' },
 			'50%': { transform: 'translateY(-10px)' },

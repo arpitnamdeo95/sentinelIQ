@@ -38,15 +38,21 @@ const createCase = async (alert) => {
   }
 };
 
-const checkAlerts = async () => {
-  try {
-    const latestAlert = await Alert.findOne({ createdContract: false }).sort({ createdAt: -1 });
-    if (latestAlert) {
-      await createCase(latestAlert);
+const watchAlerts = () => {
+  console.log("👀 Starting MongoDB Change Stream for Alerts...");
+  const changeStream = Alert.watch([{ $match: { operationType: "insert" } }]);
+
+  changeStream.on("change", async (change) => {
+    const alert = change.fullDocument;
+    if (alert && alert.createdContract === false) {
+      console.log(`new alert detected via change stream: ${alert._id}`);
+      await createCase(alert);
     }
-  } catch (error) {
-    console.error("Error checking alerts:", error);
-  }
+  });
+
+  changeStream.on("error", (error) => {
+    console.error("Change Stream Error:", error);
+  });
 };
 
-module.exports = { checkAlerts };
+module.exports = { watchAlerts };

@@ -20,21 +20,10 @@ const ContentWithLottie = () => (
     
     {/* Content */}
     <div className="flex flex-col items-center text-center">
-      <img
-        src="etherium.png"
-        alt="ZenSafe Logo"
-        className="w-20 h-15 object-contain mb-3"
-      />
-      
-      <div className="text-4xl font-extrabold tracking-wide mt-1 mb-3">
-        <span className="bg-gradient-to-t from-[#00E68F] via-[#00B378] to-[#007F5E] bg-clip-text text-transparent">
-          ZEN
-        </span>{" "}
-        <span className="bg-gradient-to-b from-[#00E68F] via-[#00B378] to-[#007F5E] bg-clip-text text-transparent">
-          SAFE
-        </span>
+      <div className="text-3xl font-bold tracking-tight mt-1 mb-2 text-white">
+        SentinelIQ
       </div>
-      <p className="text-gray-400 text-lg max-w-2xl mt-1 leading-relaxed">
+      <p className="text-zinc-400 text-lg max-w-2xl mt-1 leading-relaxed">
         Statistical data of cases undertaken and lead are listed out here.
       </p>
     </div>
@@ -123,42 +112,42 @@ const UsersPage = () => {
         </motion.div>
 
         {/* Surveillance Cases Table */}
-        <div className="overflow-x-auto shadow-md sm:rounded-lg">
-          <table className="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
+        <div className="overflow-x-auto bg-zinc-900 border border-white/5 rounded-xl shadow-sm mt-8">
+          <table className="min-w-full text-sm text-left text-zinc-300">
+            <thead className="text-xs text-zinc-400 uppercase bg-zinc-800/50 border-b border-white/5">
               <tr>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-4 font-medium tracking-wider">
                   Officer Name
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-4 font-medium tracking-wider">
                   Locality
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-4 font-medium tracking-wider">
                   Case Type
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-4 font-medium tracking-wider">
                   Case Description
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-4 font-medium tracking-wider">
                   Status
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/5">
               {caseData.map((caseItem, index) => (
-                <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{caseItem.officerName}</td>
+                <tr key={index} className="hover:bg-zinc-800/30 transition-colors">
+                  <td className="px-6 py-4 font-medium text-white">{caseItem.officerName}</td>
                   <td className="px-6 py-4">{caseItem.locality}</td>
                   <td className="px-6 py-4">{caseItem.caseType}</td>
                   <td className="px-6 py-4">{caseItem.description}</td>
                   <td className="px-6 py-4">
                     <span
-                      className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      className={`px-3 py-1 text-xs font-semibold rounded-full border ${
                         caseItem.status === "Resolved"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                           : caseItem.status === "Investigating"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
+                          ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                          : "bg-rose-500/10 text-rose-400 border-rose-500/20"
                       }`}
                     >
                       {caseItem.status}

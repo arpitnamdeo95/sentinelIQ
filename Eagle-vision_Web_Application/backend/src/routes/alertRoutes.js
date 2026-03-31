@@ -2,7 +2,8 @@
 
 const express = require('express');
 const router = express.Router();
-const Alert = require('../models/Alert'); // Assuming you have a model for alerts
+const Alert = require('../models/Alert');
+const { requireAdmin } = require('../middleware/authMiddleware');
 
 // Get all alerts (this should return a list of alerts)
 router.get('/fetch-alerts', async (req, res) => {
@@ -15,7 +16,7 @@ router.get('/fetch-alerts', async (req, res) => {
 });
 
 // Delete a specific alert by ID
-router.delete('/delete-alerts/:id', async (req, res) => {
+router.delete('/delete-alerts/:id', requireAdmin, async (req, res) => {
   const { id } = req.params;
   try {
     const alert = await Alert.findByIdAndDelete(id); // Delete alert by ID

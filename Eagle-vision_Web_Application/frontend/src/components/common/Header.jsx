@@ -1,9 +1,9 @@
 const Header = ({ title }) => {
 	return (
-	  <header className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg border-b border-gray-700">
+	  <header className="bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5 sticky top-0 z-20">
 		<center>
-		  <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-			<h1 className="text-2xl font-semibold text-transparent bg-gradient-to-b from-white to-gray-300 bg-clip-text">
+		  <div className="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8">
+			<h1 className="text-2xl font-bold tracking-tight text-white">
 			  {title}
 			</h1>
 		  </div>
@@ -12,5 +12,4 @@ const Header = ({ title }) => {
 	);
   };
   
-  export default Header;
-  
+  export default Header;

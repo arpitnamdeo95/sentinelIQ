@@ -10,7 +10,6 @@ const alertRoutes = require("./src/routes/alertRoutes.js");
 const http = require("http");
 const path = require("path");
 
-const { checkAlerts } = require("./src/services/caseService.js");
 dotenv.config()
 
 // Initialize express app
@@ -37,11 +36,12 @@ app.use("/api/residents", residentRoutes);
 app.use("/api/authorities", authorityRoutes);
 app.use("/api/mail", mailRoutes);
 
-setInterval(checkAlerts, 5000); 
-
 // Start server
 const PORT = process.env.PORT || 5000;
 // Allow the server to be accessible from the local network
-app.listen(PORT, "0.0.0.0", () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://0.0.0.0:${PORT} (Local)`);
+  // Start MongoDB Change Stream watching
+  const { watchAlerts } = require("./src/services/caseService.js");
+  watchAlerts();
 });

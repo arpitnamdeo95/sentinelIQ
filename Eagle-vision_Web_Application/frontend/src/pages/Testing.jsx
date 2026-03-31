@@ -11,12 +11,12 @@ const Testing = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-      <video ref={videoRef} src="video.mp4" controls className="w-3/4 max-w-2xl rounded-lg shadow-lg" />
-      <p className="mt-4 text-lg">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-zinc-100">
+      <video ref={videoRef} src="video.mp4" controls className="w-3/4 max-w-2xl rounded-xl shadow-sm border border-white/5" />
+      <p className="mt-6 text-lg text-zinc-300">
         There is a car at
         <span 
-          className="text-blue-400 cursor-pointer ml-2 hover:underline" 
+          className="text-indigo-400 cursor-pointer ml-2 hover:text-indigo-300 transition-colors font-mono font-medium underline underline-offset-4 decoration-indigo-400/30" 
           onClick={() => seekToTime(5)}
         >
           00:05

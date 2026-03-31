@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { FiLink, FiCpu, FiHash, FiClock, FiShield } from "react-icons/fi";
 
 const BlockchainDiagram = () => {
   const [blocks, setBlocks] = useState([]);
   const [selectedBlock, setSelectedBlock] = useState(null);
 
-  // Helper function to generate a random wallet address
   const generateRandomWalletAddress = () => {
     const characters = "0123456789abcdef";
     let address = "0x";
@@ -15,117 +15,149 @@ const BlockchainDiagram = () => {
   };
 
   useEffect(() => {
-    const dummyBlocks = Array.from({ length: 7 }, (_, i) => ({
-      id: i + 1,
-      name: `Block ${i === 0 ? "n-1" : i === 1 ? "n" : `n+${i - 1}`}`,
-      header: "Header",
-      previousAddress: `0xABC${i}`,
-      timestamp: new Date().toISOString(),
-      nonce: Math.floor(Math.random() * 100000),
-      merkleRoot: `MerkleRoot${i}`,
-      // Just one wallet address per block
-      walletAddress: generateRandomWalletAddress()
-    }));
+    let previousHash = "0000000000000000000000000000000000000000000000000000000000000000";
+    const dummyBlocks = Array.from({ length: 8 }, (_, i) => {
+      const currentHash = "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+      const block = {
+        id: i + 1,
+        name: `Block ${i === 0 ? "Genesis" : `#${i + 94382}`}`,
+        hash: currentHash,
+        previousHash: previousHash,
+        timestamp: new Date(Date.now() - (7 - i) * 600000).toISOString(),
+        nonce: Math.floor(Math.random() * 1000000),
+        merkleRoot: "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join(''),
+        walletAddress: generateRandomWalletAddress(),
+        txCount: Math.floor(Math.random() * 5) + 1
+      };
+      previousHash = currentHash;
+      return block;
+    });
     setBlocks(dummyBlocks);
   }, []);
 
-  const handleBlockClick = (block) => setSelectedBlock(block);
-  const closePopup = () => setSelectedBlock(null);
-
-  const getPositionStyle = (index) => {
-    const row = Math.floor(index / 3);
-    const col = index % 3;
-    const isEvenRow = row % 2 === 0;
-    const left = isEvenRow ? col * 33.33 : (2 - col) * 33.33;
-    return {
-      position: "absolute",
-      top: `${row * 250}px`,
-      left: `${left + 16.66}%`,
-      transform: "translateX(-50%)",
-    };
-  };
-
-  const getLinePath = (index) => {
-    const row = Math.floor(index / 3);
-    const col = index % 3;
-    const isEvenRow = row % 2 === 0;
-    const nextIndex = index + 1;
-    if (nextIndex >= blocks.length) return null;
-
-    const nextRow = Math.floor(nextIndex / 3);
-    const nextCol = nextIndex % 3;
-    const nextIsEven = nextRow % 2 === 0;
-    const x1 = `${(isEvenRow ? col * 33.33 : (2 - col) * 33.33) + 16.66}%`;
-    const x2 = `${(nextIsEven ? nextCol * 33.33 : (2 - nextCol) * 33.33) + 16.66}%`;
-    const y1 = row * 250 + 96;
-    const y2 = nextRow * 250 + 96;
-
-    return (
-      <svg className="absolute z-1" style={{ top: 20, left: 20, width: '100%', height: '100%' }}>
-        <line
-          x1={x1}
-          y1={y1}
-          x2={x2}
-          y2={y2}
-          stroke="silver"
-          strokeWidth="3"
-          strokeDasharray="12 3"
-          className="animate-blink-line"
-        />
-        <polygon
-          points={`${x2.replace('%','')} ${y2 - 5}, ${parseFloat(x2.replace('%','')) + 2} ${y2}, ${x2.replace('%','')} ${y2 + 5}`}
-          fill="silver"
-        />
-      </svg>
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-8 relative overflow-hidden">
-      <h1 className="text-4xl font-bold mb-16 text-center">Blockchain Chain Flow</h1>
+    <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 p-6 md:p-10 relative overflow-x-hidden">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
 
-      <div className="relative w-full" style={{ minHeight: `${Math.ceil(blocks.length / 3) * 300}px` }}>
-        {blocks.map((block, index) => (
-          <React.Fragment key={block.id}>
-            <div
-              style={getPositionStyle(index)}
-              className="w-[200px] flex flex-col items-center z-10"
-            >
-              {/* Single small wallet address box */}
-              <div className="mb-2 bg-gray-800 px-2 py-1 rounded text-xs text-gray-300 w-full overflow-hidden text-center">
-                {block.walletAddress.substring(0, 8)}...{block.walletAddress.substring(block.walletAddress.length - 6)}
-              </div>
-              
-              <div
-                onClick={() => handleBlockClick(block)}
-                className="w-48 h-48 bg-green-600 rounded-md shadow-xl border-4 border-green-400 flex items-center justify-center text-xl font-bold cursor-pointer hover:scale-105 transition-transform duration-300"
+      <div className="relative z-10 max-w-7xl mx-auto">
+        <header className="mb-12 text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight text-white mb-4">Immutable Incident Ledger</h1>
+          <p className="text-zinc-400 max-w-2xl mx-auto text-sm md:text-base">
+            All detected vulnerabilities and alerts are cryptographicallly sealed onto the blockchain. View the real-time topological flow of secured nodes below.
+          </p>
+        </header>
+
+        <div className="flex flex-wrap justify-center items-center gap-y-12">
+          {blocks.map((block, index) => (
+            <React.Fragment key={block.id}>
+              {/* Block Card */}
+              <div 
+                className="group relative w-full sm:w-auto bg-[#18181b] border border-white/5 hover:border-indigo-500/50 rounded-2xl p-6 shadow-sm hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] transition-all duration-300 cursor-pointer transform hover:-translate-y-2 z-10 shrink-0"
+                onClick={() => setSelectedBlock(block)}
+                style={{ minWidth: "280px", maxWidth: "320px" }}
               >
-                {block.name}
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <FiCpu className="w-20 h-20 text-indigo-500" />
+                </div>
+                
+                <div className="flex justify-between items-start mb-6 relative z-10">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-1 block">Status: Verified</span>
+                    <h3 className="text-2xl font-bold text-white">{block.name}</h3>
+                  </div>
+                  <div className="bg-zinc-900 border border-white/5 rounded-lg px-3 py-1 text-xs font-mono text-zinc-400">
+                    {block.txCount} TXs
+                  </div>
+                </div>
+
+                <div className="space-y-4 relative z-10">
+                  <div>
+                    <p className="text-xs text-zinc-500 uppercase font-semibold mb-1 flex items-center gap-1.5"><FiHash /> Block Hash</p>
+                    <p className="font-mono text-xs text-zinc-300 bg-zinc-900 border border-zinc-800 rounded p-2 truncate" title={block.hash}>
+                      {block.hash}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-zinc-500 uppercase font-semibold mb-1 flex items-center gap-1.5"><FiLink /> Prev Hash</p>
+                    <p className="font-mono text-xs text-zinc-400 bg-zinc-900/50 border border-zinc-800/50 rounded p-2 truncate" title={block.previousHash}>
+                      {block.previousHash}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-6 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
+                  <span className="text-xs text-zinc-500 font-mono"><FiClock className="inline mr-1"/> {new Date(block.timestamp).toLocaleTimeString()}</span>
+                  <span className="text-xs text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full border border-emerald-400/20 font-medium flex items-center gap-1"><FiShield /> SEALED</span>
+                </div>
               </div>
-            </div>
-            {getLinePath(index)}
-          </React.Fragment>
-        ))}
+
+              {/* Connecting Line / Arrow */}
+              {index < blocks.length - 1 && (
+                <div className="hidden sm:flex flex-col items-center justify-center px-2 md:px-4 z-0 text-zinc-600">
+                  <div className="w-8 md:w-16 h-[2px] bg-gradient-to-r from-indigo-500/20 via-indigo-400/50 to-indigo-500/20"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-indigo-500/50 border-[3px] border-[#0a0a0a] absolute"></div>
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
 
+      {/* Detail Modal */}
       {selectedBlock && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded-xl shadow-2xl max-w-md w-full relative text-white">
-            <button
-              onClick={closePopup}
-              className="absolute top-2 right-2 text-gray-400 hover:text-white text-xl"
-            >
-              ✕
-            </button>
-            <h2 className="text-2xl font-semibold mb-4">{selectedBlock.name} Details</h2>
-            <div className="space-y-2 text-sm">
-              <div><span className="font-semibold text-green-400">Header:</span> {selectedBlock.header}</div>
-              <div><span className="font-semibold text-green-400">Previous Block Address:</span> {selectedBlock.previousAddress}</div>
-              <div><span className="font-semibold text-green-400">Timestamp:</span> {new Date(selectedBlock.timestamp).toLocaleString()}</div>
-              <div><span className="font-semibold text-green-400">Nonce:</span> {selectedBlock.nonce}</div>
-              <div><span className="font-semibold text-green-400">Merkle Root:</span> {selectedBlock.merkleRoot}</div>
-              <div><span className="font-semibold text-green-400">Wallet Address:</span> {selectedBlock.walletAddress}</div>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
+          <div className="bg-[#18181b] border border-white/10 p-0 rounded-2xl shadow-2xl max-w-2xl w-full relative text-white overflow-hidden transform animate-in zoom-in-95 duration-200">
+            <div className="bg-gradient-to-r from-indigo-900/50 to-transparent p-6 sm:p-8 border-b border-white/5 flex justify-between items-center relative">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none -mt-32 -mr-32"></div>
+              <div>
+                <span className="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-indigo-500/30 mb-3 inline-block">Cryptographic Detail</span>
+                <h2 className="text-3xl font-bold text-white tracking-tight">{selectedBlock.name}</h2>
+              </div>
+              <button
+                onClick={() => setSelectedBlock(null)}
+                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white bg-zinc-900 border border-white/5 hover:bg-zinc-800 rounded-full transition-all focus:outline-none"
+              >
+                ✕
+              </button>
             </div>
+            
+            <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div>
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest font-semibold mb-2 flex items-center gap-2"><FiHash /> Block Hash</p>
+                  <p className="font-mono text-sm text-indigo-300 break-all bg-[#0a0a0a] border border-white/5 rounded-lg p-4 shadow-inner">{selectedBlock.hash}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest font-semibold mb-2 flex items-center gap-2"><FiLink /> Parent Hash</p>
+                  <p className="font-mono text-sm text-zinc-400 break-all bg-[#0a0a0a]/50 border border-white/5 rounded-lg p-4 shadow-inner">{selectedBlock.previousHash}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest font-semibold mb-2 flex items-center gap-2"><FiCpu /> Merkle Root</p>
+                  <p className="font-mono text-sm text-amber-200/80 break-all bg-amber-500/5 border border-amber-500/10 rounded-lg p-4 shadow-inner">{selectedBlock.merkleRoot}</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest font-semibold mb-2">Network Info</p>
+                  <ul className="space-y-3 bg-[#0a0a0a] border border-white/5 rounded-lg p-5">
+                    <li className="flex justify-between items-center border-b border-zinc-800/50 pb-3">
+                      <span className="text-zinc-400 text-sm">Timestamp</span>
+                      <span className="text-white text-sm font-mono">{new Date(selectedBlock.timestamp).toLocaleString()}</span>
+                    </li>
+                    <li className="flex justify-between items-center border-b border-zinc-800/50 py-3">
+                      <span className="text-zinc-400 text-sm">Nonce</span>
+                      <span className="text-emerald-400 text-sm font-mono tracking-widest">{selectedBlock.nonce}</span>
+                    </li>
+                    <li className="flex justify-between items-center pt-3">
+                      <span className="text-zinc-400 text-sm">Validating Wallet</span>
+                      <span className="text-white text-xs font-mono bg-zinc-800 rounded px-2 py-1 max-w-[140px] truncate" title={selectedBlock.walletAddress}>{selectedBlock.walletAddress}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className="w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500"></div>
           </div>
         </div>
       )}

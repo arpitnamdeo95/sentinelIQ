@@ -1,30 +1,21 @@
 import { AlertCircle, BarChart2, Cctv, Settings, Menu, Users, Bell, GitGraph, TestTube, Network, ChartNetwork } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FaRobot } from "react-icons/fa";
+import ConnectWallet from "./ConnectWallet";
 
 const Logo = () => {
   return (
     <motion.div
-      className="text-white text-center flex flex-col items-center"
+      className="text-white flex items-center mb-2 mt-1"
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      
-
-      {/* Logo Text */}
-      <div className="text-xl font-bold tracking-wide mt-1">
-        <span className="text-gradient bg-gradient-to-t from-[#00E68F] via-[#00B378] to-[#007F5E] bg-clip-text text-transparent">
-          ZEN
-        </span>{" "}
-        <span className="text-gradient bg-gradient-to-b from-[#00E68F] via-[#00B378] to-[#007F5E] bg-clip-text text-transparent">
-          SAFE
-        </span>
+      <div className="text-2xl font-bold tracking-tight text-white">
+        SentinelIQ
       </div>
-
-
     </motion.div>
   );
 };
@@ -57,7 +48,8 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchAlertCount = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/alerts/fetch-alert-count');
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        const response = await fetch(`${BACKEND_URL}/api/alerts/fetch-alert-count`);
         const data = await response.json();
         setAlertCount(data.count);
       } catch (error) {
@@ -68,28 +60,31 @@ const Sidebar = () => {
     fetchAlertCount();
   }, []);
 
-  const audio = new Audio("/path-to-your-audio-file/alert-sound.mp3");
+  const audioRef = useRef(null);
+  if (!audioRef.current) {
+    audioRef.current = new Audio("/path-to-your-audio-file/alert-sound.mp3");
+  }
 
   useEffect(() => {
     if (alertCount > 0) {
-      audio.play();
+      audioRef.current?.play().catch(() => {}); // Ignore autoplay errors
     }
-  }, [alertCount, audio]);
+  }, [alertCount]);
 
   return (
     <motion.div
       className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${isSidebarOpen ? "w-64" : "w-20"}`}
       animate={{ width: isSidebarOpen ? 256 : 80 }}
     >
-      <div className="h-full bg-gray-800 bg-opacity-50 backdrop-blur-md p-4 flex flex-col border-r border-gray-700">
-        <div className="flex items-center justify-start mb-1 mt-3 space-x-4">
+      <div className="h-full bg-[#0a0a0a] border-r border-white/5 p-4 flex flex-col">
+        <div className="flex items-center justify-start space-x-4 mb-4 mt-2">
           <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+            className="p-2 ml-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
           >
-            <Menu size={28} />
+            <Menu size={24} />
           </motion.button>
           {isSidebarOpen && <Logo />}
         </div>
@@ -98,17 +93,17 @@ const Sidebar = () => {
           {SIDEBAR_ITEMS.map((item) => (
             <Link key={item.href} to={item.href}>
               <motion.div
-                className="flex items-center p-4 text-base font-semibold rounded-lg hover:bg-gray-700 transition-colors mb-2"
+                className="flex items-center p-3 text-sm font-medium rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all mb-1.5 cursor-pointer group"
               >
-                <item.icon size={24} style={{ color: item.color, minWidth: "24px" }} />
+                <item.icon size={20} className="group-hover:text-indigo-400 transition-colors" style={{ color: item.color, minWidth: "20px" }} />
                 <AnimatePresence>
                   {isSidebarOpen && (
                     <motion.span
-                      className="ml-4 text-white whitespace-nowrap"
+                      className="ml-3 whitespace-nowrap"
                       initial={{ opacity: 0, width: 0 }}
                       animate={{ opacity: 1, width: "auto" }}
                       exit={{ opacity: 0, width: 0 }}
-                      transition={{ duration: 0.2, delay: 0.3 }}
+                      transition={{ duration: 0.2, delay: 0.1 }}
                     >
                       {item.name}
                     </motion.span>
@@ -118,6 +113,21 @@ const Sidebar = () => {
             </Link>
           ))}
         </nav>
+
+        {/* Connect Wallet — bottom of sidebar */}
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="mt-auto pt-3 border-t border-white/5"
+            >
+              <ConnectWallet compact={true} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
