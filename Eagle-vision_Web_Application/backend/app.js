@@ -43,6 +43,26 @@ app.use("/api/residents", residentRoutes);
 app.use("/api/authorities", authorityRoutes);
 app.use("/api/mail", mailRoutes);
 
+// Health check & root route (so browser doesn't show "Cannot GET /")
+app.get("/", (req, res) => {
+  res.json({
+    status: "✅ SentinelIQ Backend is Live",
+    version: "1.0.0",
+    routes: [
+      "/api/alerts/fetch-alerts",
+      "/api/alerts/fetch-alert-count",
+      "/api/dashboard",
+      "/api/residents",
+      "/api/authorities",
+      "/api/mail"
+    ]
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 // Start server
 const PORT = process.env.PORT || 5000;
 // Allow the server to be accessible from the local network
