@@ -2,8 +2,9 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    await mongoose.connect("mongodb+srv://diva:divakar2004@divacluster.4zroa.mongodb.net/UrbanGuard");
-    console.log("MongoDB connected!");
+    const uri = process.env.MONGO_URI || "mongodb+srv://diva:divakar2004@divacluster.4zroa.mongodb.net/UrbanGuard";
+    await mongoose.connect(uri);
+    console.log("MongoDB connected to Atlas!");
   } catch (err) {
     console.error(err.message);
     process.exit(1);

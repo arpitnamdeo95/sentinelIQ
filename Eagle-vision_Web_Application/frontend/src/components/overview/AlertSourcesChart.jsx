@@ -31,7 +31,7 @@ const AlertSourcesChart = () => {
 								backgroundColor: "rgba(24, 24, 27, 0.9)",
 								backdropFilter: "blur(8px)",
 								borderColor: "rgba(255,255,255,0.05)",
-								borderRadius: "12px",
+								borderRadius: "12px", 
 								color: "#fff",
 								boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)",
 								padding: "12px 16px"
